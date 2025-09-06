@@ -1,0 +1,107 @@
+import React, { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Heart, ShoppingBag } from "lucide-react";
+import ProductGrid from "../components/product/ProductGrid";
+
+export default function Favorites() {
+  const [favorites, setFavorites] = useState([]);
+  const [favoriteProducts, setFavoriteProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulated favorite products - in real app, load from Favorite entity
+    setFavoriteProducts([
+      {
+        id: "1",
+        name: "Bamboo Toothbrush Set",
+        description: "Biodegradable bamboo toothbrushes with soft bristles",
+        price: 12.99,
+        original_price: 15.99,
+        image_url: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400",
+        brand: "EcoBrush",
+        category_slug: "personal-care",
+        sustainability_rating: 5,
+        eco_certifications: ["FSC Certified", "Biodegradable"],
+        in_stock: true
+      },
+      {
+        id: "3",
+        name: "Solar Power Bank",
+        description: "Portable solar charger for eco-friendly energy on the go",
+        price: 49.99,
+        image_url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+        brand: "SolarTech",
+        category_slug: "electronics",
+        sustainability_rating: 4,
+        eco_certifications: ["Energy Star"],
+        in_stock: true
+      }
+    ]);
+    
+    setFavorites([
+      { id: 1, product_id: "1", user_email: "user@example.com" },
+      { id: 2, product_id: "3", user_email: "user@example.com" }
+    ]);
+    
+    setIsLoading(false);
+  }, []);
+
+  const handleAddToCart = (product) => {
+    console.log("Add to cart:", product);
+    // TODO: Implement add to cart functionality
+  };
+
+  const handleToggleFavorite = (productId) => {
+    setFavorites(prev => prev.filter(fav => fav.product_id !== productId));
+    setFavoriteProducts(prev => prev.filter(product => product.id !== productId));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <Heart className="w-8 h-8 text-red-500 fill-current" />
+            My Favorites
+          </h1>
+          <p className="text-gray-600 mt-2">
+            {favoriteProducts.length} favorite product{favoriteProducts.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+
+        {favoriteProducts.length === 0 ? (
+          <Card className="text-center py-12">
+            <CardContent>
+              <Heart className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No favorites yet
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Start browsing and save products you love to see them here!
+              </p>
+              <Button className="bg-green-600 hover:bg-green-700">
+                Discover Products
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <ProductGrid
+            products={favoriteProducts}
+            onAddToCart={handleAddToCart}
+            onToggleFavorite={handleToggleFavorite}
+            favorites={favorites}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
