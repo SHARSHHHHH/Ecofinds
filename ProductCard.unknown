@@ -1,0 +1,123 @@
+import React from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Heart, ShoppingCart, Leaf, Star } from "lucide-react";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+
+export default function ProductCard({ product, onAddToCart, onToggleFavorite, isFavorite }) {
+  const hasDiscount = product.original_price && product.original_price > product.price;
+  const discountPercent = hasDiscount 
+    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+    : 0;
+
+  return (
+    <Card className="group overflow-hidden bg-white/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300 border-green-100">
+      <div className="relative overflow-hidden">
+        <Link to={createPageUrl(`ProductDetail?id=${product.id}`)}>
+          <img
+            src={product.image_url || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400"}
+            alt={product.name}
+            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        </Link>
+        
+        {/* Discount Badge */}
+        {hasDiscount && (
+          <Badge className="absolute top-2 left-2 bg-red-500 text-white">
+            -{discountPercent}%
+          </Badge>
+        )}
+
+        {/* Sustainability Badge */}
+        <Badge className="absolute top-2 right-2 bg-green-500 text-white flex items-center gap-1">
+          <Leaf className="w-3 h-3" />
+          Eco
+        </Badge>
+
+        {/* Favorite Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-12 right-2 bg-white/80 hover:bg-white text-gray-600 hover:text-red-500 transition-colors"
+          onClick={() => onToggleFavorite(product.id)}
+        >
+          <Heart className={`w-4 h-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+        </Button>
+      </div>
+
+      <CardContent className="p-4">
+        <div className="flex items-center gap-1 mb-2">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={i}
+              className={`w-3 h-3 ${
+                i < (product.sustainability_rating || 0)
+                  ? 'fill-green-500 text-green-500'
+                  : 'text-gray-300'
+              }`}
+            />
+          ))}
+          <span className="text-xs text-gray-500 ml-1">
+            ({product.sustainability_rating || 0})
+          </span>
+        </div>
+
+        <Link to={createPageUrl(`ProductDetail?id=${product.id}`)}>
+          <h3 className="font-semibold text-gray-900 mb-1 hover:text-green-700 transition-colors">
+            {product.name}
+          </h3>
+        </Link>
+        
+        <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+          {product.description}
+        </p>
+
+        <p className="text-xs text-green-600 font-medium mb-3">
+          {product.brand}
+        </p>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-green-700">
+              ${product.price}
+            </span>
+            {hasDiscount && (
+              <span className="text-sm text-gray-500 line-through">
+                ${product.original_price}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Eco Certifications */}
+        {product.eco_certifications && product.eco_certifications.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {product.eco_certifications.slice(0, 2).map((cert, index) => (
+              <Badge key={index} variant="outline" className="text-xs border-green-200 text-green-700">
+                {cert}
+              </Badge>
+            ))}
+            {product.eco_certifications.length > 2 && (
+              <Badge variant="outline" className="text-xs border-green-200 text-green-700">
+                +{product.eco_certifications.length - 2}
+              </Badge>
+            )}
+  </div>
+        )}
+      </CardContent>
+
+      <CardFooter className="p-4 pt-0">
+        <Button
+          onClick={() => onAddToCart(product)}
+          disabled={!product.in_stock}
+          className="w-full bg-green-600 hover:bg-green-700 text-white"
+        >
+          <ShoppingCart className="w-4 h-4 mr-2" />
+          {product.in_stock ? 'Add to Cart' : 'Out of Stock'}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
