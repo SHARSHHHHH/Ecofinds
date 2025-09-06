@@ -1,0 +1,77 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Product name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Product description"
+    },
+    "price": {
+      "type": "number",
+      "description": "Product price"
+    },
+    "original_price": {
+      "type": "number",
+      "description": "Original price before discount"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Main product image"
+    },
+    "images": {
+  "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Additional product images"
+    },
+    "category_slug": {
+      "type": "string",
+      "description": "Category identifier"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Product brand"
+    },
+    "sustainability_rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Sustainability rating from 1-5"
+    },
+    "eco_certifications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of eco certifications"
+    },
+    "materials": {
+      "type": "array",
+       "items": {
+        "type": "string"
+      },
+      "description": "Sustainable materials used"
+    },
+    "in_stock": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether product is in stock"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether product is featured"
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "price",
+    "category_slug"
+  ]
+}
