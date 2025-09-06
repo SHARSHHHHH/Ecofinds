@@ -1,0 +1,219 @@
+import React, { useState, useEffect } from "react";
+import { Product, Category } from "@/entities/all";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search, Grid, List } from "lucide-react";
+import ProductGrid from "../components/product/ProductGrid";
+import ProductFilters from "../components/product/ProductFilters";
+
+export default function Products() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    categories: [],
+    priceRange: [0, 200],
+    minRating: 1,
+    sortBy: "featured",
+    inStockOnly: false
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState("grid");
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    let filtered = [...products];
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.brand.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Category filter
+    if (filters.categories.length > 0) {
+      filtered = filtered.filter(product =>
+        filters.categories.includes(product.category_slug)
+      );
+    }
+
+    // Price range filter
+    filtered = filtered.filter(product =>
+      product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1]
+    );
+
+    // Rating filter
+    filtered = filtered.filter(product =>
+      (product.sustainability_rating || 0) >= filters.minRating
+    );
+
+    // Stock filter
+    if (filters.inStockOnly) {
+      filtered = filtered.filter(product => product.in_stock);
+    }
+
+    // Sorting
+    switch (filters.sortBy) {
+      case "price_low":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "price_high":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "rating":
+        filtered.sort((a, b) => (b.sustainability_rating || 0) - (a.sustainability_rating || 0));
+        break;
+      case "newest":
+        filtered.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+        break;
+      default: // featured
+        filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+    }
+
+    setFilteredProducts(filtered);
+  }, [products, searchQuery, filters]);
+
+  const loadData = async () => {
+    try {
+      const [productsData, categoriesData] = await Promise.all([
+        Product.list("-created_date"),
+        Category.list("name")
+      ]);
+      setProducts(productsData);
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    }
+    setIsLoading(false);
+  };
+
+  const handleAddToCart = (product) => {
+    console.log("Add to cart:", product);
+    // TODO: Implement add to cart functionality
+  };
+
+  const handleToggleFavorite = (productId) => {
+    console.log("Toggle favorite:", productId);
+    // TODO: Implement favorite functionality
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      categories: [],
+      priceRange: [0, 200],
+      minRating: 1,
+      sortBy: "featured",
+      inStockOnly: false
+    });
+    setSearchQuery("");
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            Sustainable Products
+          </h1>
+          <p className="text-gray-600">
+            Discover eco-friendly products that make a difference
+          </p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 border-green-200 focus:border-green-500"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar Filters */}
+          <aside className="w-full lg:w-80 flex-shrink-0">
+            <ProductFilters
+              categories={categories}
+              filters={filters}
+              onFiltersChange={setFilters}
+              onClearFilters={clearFilters}
+            />
+          </aside>
+
+          {/* Main Content */}
+          <main className="flex-1">
+            {/* Results Header */}
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-gray-600">
+                {filteredProducts.length} products found
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={viewMode === "grid" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                  className="text-green-600 border-green-600"
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className="text-green-600 border-green-600"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Products */}
+            {filteredProducts.length > 0 ? (
+              <ProductGrid
+                products={filteredProducts}
+                onAddToCart={handleAddToCart}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <Search className="w-12 h-12 mx-auto" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No products found
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Try adjusting your search or filters to find what you're looking for.
+                </p>
+                <Button onClick={clearFilters} className="bg-green-600 hover:bg-green-700">
+                  Clear all filters
+                </Button>
+              </div>
+            )}
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}
