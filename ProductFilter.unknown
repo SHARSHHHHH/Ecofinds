@@ -1,0 +1,142 @@
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Filter, X } from "lucide-react";
+
+export default function ProductFilters({ 
+  categories, 
+  filters, 
+  onFiltersChange, 
+  onClearFilters 
+}) {
+  const handleCategoryToggle = (categorySlug, checked) => {
+    const newCategories = checked
+      ? [...(filters.categories || []), categorySlug]
+      : (filters.categories || []).filter(cat => cat !== categorySlug);
+    
+    onFiltersChange({ ...filters, categories: newCategories });
+  };
+
+  const handlePriceRangeChange = (value) => {
+    onFiltersChange({ ...filters, priceRange: value });
+  };
+
+  const handleSortChange = (value) => {
+    onFiltersChange({ ...filters, sortBy: value });
+  };
+
+  const handleRatingChange = (value) => {
+    onFiltersChange({ ...filters, minRating: value });
+  };
+
+  return (
+    <Card className="bg-white/80 backdrop-blur-sm border-green-100">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between text-lg">
+          <div className="flex items-center gap-2">
+            <Filter className="w-5 h-5" />
+            Filters
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClearFilters}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <X className="w-4 h-4" />
+            Clear
+          </Button>
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent className="space-y-6">
+        {/* Sort By */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Sort By</Label>
+          <Select value={filters.sortBy || "featured"} onValueChange={handleSortChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sort by..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="featured">Featured</SelectItem>
+              <SelectItem value="price_low">Price: Low to High</SelectItem>
+              <SelectItem value="price_high">Price: High to Low</SelectItem>
+              <SelectItem value="rating">Sustainability Rating</SelectItem>
+              <SelectItem value="newest">Newest First</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Categories */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Categories</Label>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {categories.map((category) => (
+              <div key={category.slug} className="flex items-center space-x-2">
+                <Checkbox
+                  id={category.slug}
+                  checked={(filters.categories || []).includes(category.slug)}
+                  onCheckedChange={(checked) => handleCategoryToggle(category.slug, checked)}
+                />
+                <Label
+                  htmlFor={category.slug}
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  {category.name}
+                </Label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Price Range */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">
+            Price Range: ${filters.priceRange?.[0] || 0} - ${filters.priceRange?.[1] || 200}
+          </Label>
+          <Slider
+            value={filters.priceRange || [0, 200]}
+            onValueChange={handlePriceRangeChange}
+            max={200}
+            min={0}
+            step={5}
+            className="w-full"
+          />
+        </div>
+
+        {/* Sustainability Rating */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">
+            Min Sustainability Rating: {filters.minRating || 1}⭐
+          </Label>
+          <Slider
+            value={[filters.minRating || 1]}
+            onValueChange={(value) => handleRatingChange(value[0])}
+            max={5}
+            min={1}
+            step={1}
+            className="w-full"
+          />
+        </div>
+
+        {/* In Stock Only */}
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="inStock"
+            checked={filters.inStockOnly || false}
+            onCheckedChange={(checked) => 
+              onFiltersChange({ ...filters, inStockOnly: checked })
+            }
+          />
+          <Label htmlFor="inStock" className="text-sm font-normal cursor-pointer">
+            In stock only
+          </Label>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

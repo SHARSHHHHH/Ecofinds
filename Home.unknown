@@ -1,0 +1,265 @@
+import React, { useState, useEffect } from "react";
+import { Product, Category } from "@/entities/all";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
+import { 
+  Leaf, 
+  Recycle, 
+  Heart, 
+  Award, 
+  ArrowRight, 
+  Sparkles,
+  ShieldCheck,
+  Globe
+} from "lucide-react";
+import ProductGrid from "../components/product/ProductGrid";
+
+export default function Home() {
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [products, cats] = await Promise.all([
+        Product.filter({ featured: true }, "-created_date", 8),
+        Category.list("-created_date", 6)
+      ]);
+      setFeaturedProducts(products);
+      setCategories(cats);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    }
+    setIsLoading(false);
+  };
+
+  const features = [
+    {
+      icon: Leaf,
+      title: "100% Sustainable",
+      description: "Every product is carefully vetted for environmental impact"
+    },
+    {
+      icon: Recycle,
+      title: "Carbon Neutral",
+      description: "We offset all shipping emissions and packaging waste"
+    },
+    {
+      icon: ShieldCheck,
+      title: "Certified Quality",
+      description: "All products meet strict sustainability certifications"
+    },
+    {
+      icon: Globe,
+      title: "Global Impact",
+      description: "Supporting eco-friendly brands worldwide"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700 text-white">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  New Sustainable Collection
+                </Badge>
+                <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+                  Discover
+                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-green-300">
+                    Eco-Friendly
+                  </span>
+                  Products
+                </h1>
+                <p className="text-xl text-green-100 max-w-lg">
+                  Shop sustainably and make a positive impact on our planet. Every purchase supports environmental conservation.
+                </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link to={createPageUrl("Products")}>
+                  <Button size="lg" className="bg-white text-green-700 hover:bg-green-50 font-semibold">
+                    Shop Now
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </Link>
+                <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
+                  Learn More
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-6 pt-8">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">10k+</div>
+                  <div className="text-green-200 text-sm">Happy Customers</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">500+</div>
+                  <div className="text-green-200 text-sm">Eco Products</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">50+</div>
+                  <div className="text-green-200 text-sm">Green Brands</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400/30 to-blue-500/30 rounded-3xl blur-3xl"></div>
+              <img
+                src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600"
+                alt="Sustainable products"
+                className="relative w-full h-96 lg:h-[500px] object-cover rounded-2xl shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Why Choose EcoFind?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              We're committed to making sustainable shopping accessible, transparent, and impactful.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="text-center border-green-100 hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <feature.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      <section className="py-20 bg-gradient-to-br from-green-50 to-emerald-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Shop by Category
+            </h2>
+            <p className="text-xl text-gray-600">
+              Find sustainable products for every aspect of your life
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            {categories.map((category) => (
+              <Link key={category.id} to={createPageUrl(`Products?category=${category.slug}`)}>
+                <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-green-100">
+                  <div className="relative">
+                    <img
+                      src={category.image_url || "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400"}
+                      alt={category.name}
+                      className="w-full h-32 md:h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <h3 className="text-white text-lg font-bold text-center">
+                        {category.name}
+                      </h3>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link to={createPageUrl("Products")}>
+              <Button size="lg" className="bg-green-600 hover:bg-green-700">
+                View All Products
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products */}
+      {featuredProducts.length > 0 && (
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <Badge className="bg-green-100 text-green-800 mb-4">
+                <Award className="w-3 h-3 mr-1" />
+                Staff Picks
+              </Badge>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                Featured Products
+                </h2>
+                 <p className="text-xl text-gray-600">
+                Hand-picked sustainable products our team loves
+              </p>
+            </div>
+
+            <ProductGrid
+              products={featuredProducts}
+              onAddToCart={(product) => console.log("Add to cart:", product)}
+              onToggleFavorite={(productId) => console.log("Toggle favorite:", productId)}
+            />
+
+            <div className="text-center mt-12">
+              <Link to={createPageUrl("Products")}>
+                <Button variant="outline" size="lg" className="border-green-600 text-green-600 hover:bg-green-50">
+                  See All Products
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-green-700 to-emerald-800 text-white">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <Heart className="w-16 h-16 mx-auto mb-6 text-green-300" />
+          <h2 className="text-3xl lg:text-4xl font-bold mb-6">
+            Ready to Make a Difference?
+          </h2>
+          <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
+            Join thousands of eco-conscious shoppers who are choosing sustainability without compromising on quality.
+          </p>
+          <Link to={createPageUrl("Products")}>
+            <Button size="lg" className="bg-white text-green-700 hover:bg-green-50 font-semibold">
+              Start Shopping Green
+              <Leaf className="w-5 h-5 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+ 
